@@ -13,6 +13,8 @@ import { faComments } from "@fortawesome/free-solid-svg-icons";
 import pdf from "../assets/images/pdf.png";
 
 import axios from "axios";
+
+var url = process.env.REACT_APP_API_KEY;
 const StudentDashboard = () => {
   const userdetails = JSON.parse(localStorage.getItem("userdetails"));
   const SelectedCatByStudent = JSON.parse(
@@ -30,7 +32,7 @@ const StudentDashboard = () => {
 
       try {
         const result = await axios.post(
-          "http://localhost:3000/lecture/getLecturesByCategory",
+          `${url}lecture/getLecturesByCategory`,
           cat
         );
         const originalArray = result?.data?.data;
@@ -56,7 +58,7 @@ const StudentDashboard = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/lecture/downloadLeacture",
+        `${url}lecture/downloadLeacture`,
         pdfName,
         { responseType: "blob" }
       );
@@ -86,10 +88,7 @@ const StudentDashboard = () => {
       receiverId: receiver,
     };
     try {
-      const result = await axios.post(
-        "http://localhost:3000/conversation",
-        usersIds
-      );
+      const result = await axios.post(`${url}conversation`, usersIds);
 
       console.log(result);
       navigate("/Messenger");

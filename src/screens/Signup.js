@@ -6,11 +6,14 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { convertLength } from "@mui/material/styles/cssUtils";
 
+var url = process.env.REACT_APP_API_KEY;
 const SignUpPage = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [Attachment, setAttachments] = useState("");
   const [nameError, setNameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
@@ -32,46 +35,72 @@ const SignUpPage = () => {
   };
 
   const handleSubmit = async (event) => {
-    event.preventDefault();
+    const data = new FormData();
+    data.append("file", Attachment);
+    data.append("upload_preset", "MuhammadTufailAli");
+    data.append("cloud_name", "vehiclebuddy");
 
-    let hasError = false;
-    if (name.trim() === "") {
-      setNameError(true);
-      hasError = true;
-    }
-    if (email.trim() === "") {
-      setEmailError(true);
-      hasError = true;
-    }
-    if (password.trim() === "") {
-      setPasswordError(true);
-      hasError = true;
-    }
+    fetch("https://api.cloudinary.com/v1_1/vehiclebuddy/image/upload", {
+      method: "post",
+      body: data,
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        var newUrl = data.url.slice(0, 4) + "s" + data.url.slice(4);
 
-    if (hasError) {
-      return;
-    } else {
-      const userData = {
-        name: name,
-        email: email,
-        password: password,
-      };
+        console.log("NEWWWWWW URLLLLLLS");
+        console.log(newUrl);
+        const photoUrl = newUrl;
 
-      try {
-        const result = await axios.post(
-          "http://localhost:3000/users/signup",
-          userData
-        );
+        event.preventDefault();
 
-        toast.success(result?.data?.message);
+        console.log(Attachment);
 
-        setName("");
-        setEmail("");
-        setPassword("");
-      } catch (err) {
-        toast.error(err?.response?.data?.message);
-      }
-    }
+        let hasError = false;
+        if (name.trim() === "") {
+          setNameError(true);
+          hasError = true;
+        }
+        if (email.trim() === "") {
+          setEmailError(true);
+          hasError = true;
+        }
+        if (password.trim() === "") {
+          setPasswordError(true);
+          hasError = true;
+        }
+        if (!Attachment) {
+          setPasswordError(true);
+          hasError = true;
+        }
+
+        if (hasError) {
+          return;
+        } else {
+          const Final = async () => {
+            const userData = {
+              name: name,
+              email: email,
+              password: password,
+              photo: photoUrl,
+            };
+
+            try {
+              const result = await axios.post(`${url}users/signup`, userData);
+
+              toast.success(result?.data?.message);
+
+              setName("");
+              setEmail("");
+              setPassword("");
+              setAttachments("");
+            } catch (err) {
+              toast.error(err?.response?.data?.message);
+            }
+          };
+          Final();
+        }
+      });
   };
 
   return (
@@ -165,6 +194,20 @@ const SignUpPage = () => {
             onChange={handlePasswordChange}
             error={passwordError}
             helperText={passwordError ? "Please enter a password" : ""}
+          />
+
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              setAttachments(e.target.files[0]);
+            }}
+            style={{
+              display: "flex",
+              marginLeft: "auto",
+              marginRight: "auto",
+              marginTop: 20,
+            }}
           />
 
           <Button

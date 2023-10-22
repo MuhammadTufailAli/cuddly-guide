@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Outlet, useNavigate } from "react-router-dom";
-
+var url = process.env.REACT_APP_API_KEY;
 function ProtectedRoutes() {
   const navigate = useNavigate();
   const [RunUseEffectFirst, setRunUseEffectFirst] = useState(false);
@@ -19,7 +19,7 @@ function ProtectedRoutes() {
       const CheckUserIsValid = async () => {
         try {
           const result = await axios.post(
-            "http://localhost:3000/users/signin",
+            `${url}users/signin`,
             userCredentials
           );
           setRunUseEffectFirst(true);

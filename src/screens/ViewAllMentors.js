@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
 import pdf from "../assets/images/pdf.png";
 
+var url = process.env.REACT_APP_API_KEY;
 const ViewAllMentors = () => {
   const Lectures = JSON.parse(localStorage.getItem("Lectures"));
   const userdetails = JSON.parse(localStorage.getItem("userdetails"));
@@ -16,10 +17,7 @@ const ViewAllMentors = () => {
       receiverId: receiver,
     };
     try {
-      const result = await axios.post(
-        "http://localhost:3000/conversation",
-        usersIds
-      );
+      const result = await axios.post(`${url}conversation`, usersIds);
 
       console.log(result);
       navigate("/Messenger");
@@ -35,7 +33,7 @@ const ViewAllMentors = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/lecture/downloadLeacture",
+        `${url}lecture/downloadLeacture`,
         pdfName,
         { responseType: "blob" }
       );

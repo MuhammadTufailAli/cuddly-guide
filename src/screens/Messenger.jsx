@@ -9,6 +9,7 @@ import axios from "axios";
 import TextField from "@mui/material/TextField";
 import { io } from "socket.io-client";
 
+var url = process.env.REACT_APP_API_KEY;
 function Messenger() {
   const userdetails = JSON.parse(localStorage.getItem("userdetails"));
   const [conversation, setConversation] = useState([]);
@@ -38,7 +39,7 @@ function Messenger() {
     };
 
     axios
-      .post("http://localhost:3000/conversation/GetConversation", userId)
+      .post(`${url}conversation/GetConversation`, userId)
       .then((res) => {
         console.log("Conversation frombackend is");
 
@@ -61,7 +62,7 @@ function Messenger() {
       );
 
       axios
-        .get(`http://localhost:3000/message/${currentChat?._id}`)
+        .get(`${url}message/${currentChat?._id}`)
         .then((res) => {
           setMessages(res.data);
         })
@@ -70,8 +71,10 @@ function Messenger() {
         });
 
       axios
-        .get(`http://localhost:3000/users/singleUser/${otherUserId}`)
+        .get(`${url}users/singleUser/${otherUserId}`)
         .then((res) => {
+          console.log("HANNNNNNNNNNNNNNNN");
+          console.log(res.data.data);
           setreceiverUser(res.data.data.doc);
         })
         .catch((err) => {
@@ -79,6 +82,10 @@ function Messenger() {
         });
     }
   };
+  console.log(
+    "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH",
+    receiverUser
+  );
 
   //To connect to server using socket io
   useEffect(() => {
@@ -144,7 +151,6 @@ function Messenger() {
       </div>
     );
   } else {
-    const url = "/Backend/public/images/users/" + receiverUser?.photo;
     return (
       <div
         className="TopContainer"
@@ -184,7 +190,7 @@ function Messenger() {
                 <div className="ChatUserName">
                   <img
                     className="OtherUserPhoto"
-                    src="https://static.vecteezy.com/system/resources/previews/007/033/146/original/profile-icon-login-head-icon-vector.jpg"
+                    src={receiverUser?.photo}
                     alt="No photo"
                   />
 
@@ -193,7 +199,11 @@ function Messenger() {
                 <div className="messageArea">
                   {messages.map((m) => (
                     <div ref={scrollRef}>
-                      <Message message={m} own={m.sender === currentUser} />
+                      <Message
+                        message={m}
+                        own={m.sender === currentUser}
+                        photo={receiverUser?.photo}
+                      />
                     </div>
                   ))}
                 </div>
@@ -220,7 +230,7 @@ function Messenger() {
                       });
 
                       axios
-                        .post(`http://localhost:3000/message`, message)
+                        .post(`${url}message`, message)
                         .then((res) => {
                           setLastMessage(res.data.text);
                           setMessages([...messages, res.data]);

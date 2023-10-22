@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+var url = process.env.REACT_APP_API_KEY;
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,10 +48,7 @@ const Login = () => {
         password: password,
       };
       try {
-        const result = await axios.post(
-          "http://localhost:3000/users/signin",
-          userCredentials
-        );
+        const result = await axios.post(`${url}users/signin`, userCredentials);
         toast.success(result?.data?.message);
         localStorage.setItem("userdetails", JSON.stringify(result?.data?.data));
 

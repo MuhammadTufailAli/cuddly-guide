@@ -3,6 +3,8 @@ import "./chatOnline.css";
 
 import axios from "axios";
 
+var url = process.env.REACT_APP_API_KEY;
+
 function ChatOnline({ onlineUsers, curentId, setcurrentChat }) {
   const [allUsers, setAllusers] = useState([]);
   const [onlineFriends, setOnlineFriends] = useState([]);
@@ -37,7 +39,7 @@ function ChatOnline({ onlineUsers, curentId, setcurrentChat }) {
     try {
       console.log(user._id);
       const res = await axios.get(
-        `http://localhost:3000/conversation/find/${curentId}/${user._id}`
+        `${url}conversation/find/${curentId}/${user._id}`
       );
       console.log(res);
       setcurrentChat(res.data.data);
@@ -63,7 +65,6 @@ function ChatOnline({ onlineUsers, curentId, setcurrentChat }) {
         <p style={{ marginLeft: 13 }}>Available soon</p>
         {onlineFriends.map((o) => {
           if (o._id !== curentId) {
-            const url = "/Backend/public/images/users/" + o?.photo;
             return (
               <div className="OnlineUsers" onClick={() => handleClick(o)}>
                 <img

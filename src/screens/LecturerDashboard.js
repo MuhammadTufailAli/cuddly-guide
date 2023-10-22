@@ -5,17 +5,23 @@ import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComments } from "@fortawesome/free-solid-svg-icons";
+
+import { BiSolidTrashAlt } from "react-icons/bi";
 import pdf from "../assets/images/pdf.png";
 
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+var urlBackend = process.env.REACT_APP_API_KEY;
 const LecturerDashboard = () => {
   const userdetails = JSON.parse(localStorage.getItem("userdetails"));
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [Ask, setAsk] = useState(false);
+  const [Id, setId] = useState(false);
   const [lectureName, setLectureName] = useState("");
+  const [lectureLink, setLectureLink] = useState("");
   const [lectureDescription, setLectureDescription] = useState("");
   const [attachments, setAttachments] = useState("");
 
@@ -33,7 +39,7 @@ const LecturerDashboard = () => {
 
       try {
         const result = await axios.post(
-          "http://localhost:3000/lecture/getMentorLectures",
+          `${urlBackend}lecture/getMentorLectures`,
           userId
         );
         console.log(result?.data?.data);
@@ -60,7 +66,7 @@ const LecturerDashboard = () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:3000/lecture/downloadLeacture",
+        `${urlBackend}lecture/downloadLeacture`,
         pdfName,
         { responseType: "blob" }
       );
@@ -84,6 +90,20 @@ const LecturerDashboard = () => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      const result = await axios.delete(
+        `${urlBackend}lecture/deleteLecture/${Id}`
+      );
+      setAsk(false);
+      setId("");
+      setgetLectureAgain(!getLectureAgain);
+      toast.success("Deleted Successfully");
+    } catch (err) {
+      toast.error(err?.response?.data?.message);
+    }
+  };
+
   const handleUpload = async () => {
     console.log("Lecture Name:", lectureName);
     console.log("Lecture Description:", lectureDescription);
@@ -91,6 +111,7 @@ const LecturerDashboard = () => {
 
     if (
       lectureName.trim() === "" ||
+      lectureLink.trim() === "" ||
       lectureDescription.trim() === "" ||
       attachments === ""
     ) {
@@ -99,6 +120,7 @@ const LecturerDashboard = () => {
       const lectureDetails = new FormData();
       lectureDetails.append("pdfFile", attachments);
       lectureDetails.append("lectureName", lectureName);
+      lectureDetails.append("lectureLink", lectureLink);
       lectureDetails.append("lectureDescription", lectureDescription);
       lectureDetails.append("refOfUser", userdetails?._id);
       lectureDetails.append("category", userdetails?.subject);
@@ -106,7 +128,7 @@ const LecturerDashboard = () => {
 
       try {
         const result = await axios.post(
-          "http://localhost:3000/lecture/addLecture",
+          `${urlBackend}lecture/addLecture`,
           lectureDetails
         );
 
@@ -115,6 +137,7 @@ const LecturerDashboard = () => {
         toast.success("Lecture added successfully");
         setgetLectureAgain(!getLectureAgain);
         setLectureName("");
+        setLectureLink("");
         setLectureDescription("");
         setAttachments("");
         setOpen(false);
@@ -218,6 +241,14 @@ const LecturerDashboard = () => {
                 onChange={(e) => setLectureName(e.target.value)}
                 margin="normal"
               />
+
+              <TextField
+                label="Lecture Link"
+                fullWidth
+                value={lectureLink}
+                onChange={(e) => setLectureLink(e.target.value)}
+                margin="normal"
+              />
               <TextField
                 label="Lecture Description"
                 fullWidth
@@ -234,12 +265,65 @@ const LecturerDashboard = () => {
                 style={{ marginTop: "16px" }}
               />
               <Button
-                onClick={handleUpload}
+                onClick={() => {
+                  handleUpload();
+                }}
                 variant="contained"
                 color="primary"
                 style={{ marginTop: "16px" }}>
                 Upload
               </Button>
+            </div>
+          </Modal>
+
+          {/* Modal to ask you ant to delete or not */}
+
+          <Modal
+            open={Ask}
+            onClose={handleClose}
+            aria-labelledby="upload-lecture-modal"
+            aria-describedby="upload-lecture-description">
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                backgroundColor: "white",
+                padding: "20px",
+                width: "400px",
+              }}>
+              <p
+                style={{
+                  margin: 5,
+                  textAlign: "center",
+                  fontSize: 24,
+                  fontWeight: "bold",
+                }}>
+                Want to delete lecture?
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}>
+                <Button
+                  onClick={handleDelete}
+                  variant="contained"
+                  color="primary"
+                  style={{ margin: 10 }}>
+                  Confirm
+                </Button>
+                <Button
+                  onClick={() => {
+                    setAsk(false);
+                  }}
+                  variant="outlined"
+                  style={{ margin: 10 }}>
+                  Cancel
+                </Button>
+              </div>
             </div>
           </Modal>
         </div>
@@ -266,9 +350,27 @@ const LecturerDashboard = () => {
                     marginRight: "auto",
                   }}>
                   <CardContent>
-                    <Typography variant="h6">
-                      Lecture {index + 1}: {data?.lectureName}
-                    </Typography>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}>
+                      <Typography variant="h6">
+                        Lecture {index + 1}: {data?.lectureName}
+                      </Typography>
+
+                      <BiSolidTrashAlt
+                        style={{ cursor: "pointer" }}
+                        color="red"
+                        size={22}
+                        onClick={() => {
+                          setAsk(true);
+                          setId(data?._id);
+                        }}
+                      />
+                    </div>
+
                     <Typography variant="body2">
                       {data?.lectureDescription}
                     </Typography>
@@ -281,6 +383,10 @@ const LecturerDashboard = () => {
                     alt="PDF"
                     style={{ width: 80, height: 80, cursor: "pointer" }}
                   />
+                  <br />
+                  <a style={{ marginLeft: 14 }} href={data?.lectureLink}>
+                    Link
+                  </a>
                 </Card>
               </Grid>
             );

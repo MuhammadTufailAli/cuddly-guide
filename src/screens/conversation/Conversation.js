@@ -3,6 +3,7 @@ import axios from "axios";
 
 import "./conversation.css";
 
+var url = process.env.REACT_APP_API_KEY;
 function Conversation({ conversation, currentUser, lastMessage }) {
   const [user, setUser] = useState(null);
 
@@ -10,7 +11,7 @@ function Conversation({ conversation, currentUser, lastMessage }) {
 
   const getfriends = (friendId) => {
     axios
-      .get(`http://localhost:3000/users/singleUser/${friendId}`)
+      .get(`${url}users/singleUser/${friendId}`)
       .then((res) => {
         console.log(res.data.data.doc);
         setUser(res.data.data.doc);
@@ -34,14 +35,9 @@ function Conversation({ conversation, currentUser, lastMessage }) {
       </div>
     );
   } else {
-    const url = "/Backend/public/images/users/" + user?.photo;
     return (
       <div className="conversationContainer">
-        <img
-          className="FriendPhoto"
-          src="https://static.vecteezy.com/system/resources/previews/007/033/146/original/profile-icon-login-head-icon-vector.jpg"
-          alt="No photo"
-        />
+        <img className="FriendPhoto" src={user?.photo} alt="No photo" />
         <div className="TextOfConversation">
           <p style={{ fontWeight: "bold" }}>{user?.name}</p>
           <p className="ReceivedMessage">{lastMessage}</p>

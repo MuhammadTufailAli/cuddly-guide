@@ -40,7 +40,7 @@ const imageContainerStyle = {
   backgroundPosition: "center",
   width: 400,
 };
-
+var url = process.env.REACT_APP_API_KEY;
 function MentorRegistrationForm() {
   const navigate = useNavigate();
 
@@ -68,7 +68,7 @@ function MentorRegistrationForm() {
       };
       try {
         const result = await axios.patch(
-          "http://localhost:3000/users/updateMe",
+          `${url}users/updateMe`,
           userCredentials
         );
 

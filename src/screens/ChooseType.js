@@ -3,7 +3,7 @@ import { AppBar, Toolbar, Typography, Button } from "@mui/material";
 import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 
 import axios from "axios";
-
+var url = process.env.REACT_APP_API_KEY;
 const ChooseType = () => {
   const navigate = useNavigate();
   const userdetails = JSON.parse(localStorage.getItem("userdetails"));
@@ -14,10 +14,7 @@ const ChooseType = () => {
       role: user,
     };
     try {
-      const result = await axios.patch(
-        "http://localhost:3000/users/updateMe",
-        userCredentials
-      );
+      const result = await axios.patch(`${url}users/updateMe`, userCredentials);
 
       localStorage.setItem(
         "userdetails",
